@@ -1,0 +1,20 @@
+import jwt from "jsonwebtoken";
+import AppError from "../utilis/errorClass.js";
+import User from "../../Data Base/models/user.model.js";
+
+const auth = async (req, res, next) => {
+  const { token } = req.headers;
+  if (!token) throw new AppError("token not found");
+  const decoded = jwt.verify(token, process.env.logeInSegnature);
+
+  const user = await User.findOne({ email: decoded.email });
+
+  if (parseInt(user.passChengedAt.getTime() / 1000) > decoded.iat) {
+    return res
+      .status(400)
+      .json({ msg: "token is expired please log in again" });
+  }
+
+  next();
+};
+export default auth;
