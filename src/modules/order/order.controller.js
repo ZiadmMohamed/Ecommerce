@@ -5,7 +5,8 @@ import Order from "../../../Data Base/models/order.model.js";
 import Coupon from "../../../Data Base/models/coupones.model.js";
 import createInvoice from "../../services/createInvoice.js";
 import { sendEmail } from "../../services/sendEmail.js";
-
+import payment from "../../utilis/payment.js";
+import Stripe from "stripe";
 export const createOrder = async (req, res, next) => {
   const {
     productId,
@@ -26,19 +27,18 @@ export const createOrder = async (req, res, next) => {
     coupon = await Coupon.findOneAndUpdate(
       {
         couponCode,
-        usedBy: { $nin: [user._id] },
+        // usedBy: { $nin: [user._id] },
         toDate: { $gte: new Date() },
       },
-      { $push: { usedBy: user._id } },
-      { new: true }
+      { $push: { usedBy: user._id } }
     );
 
     if (!coupon) {
       throw new AppError("Coupon does not exist or has expired");
     }
     discount = coupon.Amount;
+    req.body.coupon = coupon;
   }
-
   let flag = false;
 
   if (productId) {
@@ -100,6 +100,50 @@ export const createOrder = async (req, res, next) => {
 
   if (flag) await Cart.updateOne({ userId: user._id }, { products: [] });
 
+  if (paymentMethod == "card") {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    if (req?.body?.coupon) {
+      const coupon = await stripe.coupons.create({
+        amount_off: req.body.coupon.Amount,
+        currency: "EGP",
+        duration: "once",
+      });
+
+      console.log(coupon);
+      req.body.couponId = coupon.id;
+    }
+
+    const session = await payment({
+      stripe,
+      payment_method_types: ["card"],
+      customer_email: user.email,
+      metadata: {
+        orderId: order._id.toString(),
+      },
+      mode: "payment",
+      success_url: `${req.protocol}://${req.headers.host}/order/success/${order._id}`,
+      cancel_url: `${req.protocol}://${req.headers.host}/order/cancel/${order._id}`,
+      line_items: order.products.map((product) => {
+        return {
+          price_data: {
+            currency: "EGP",
+            unit_amount: product.price * 100,
+            product_data: {
+              name: product.title,
+            },
+          },
+          quantity: product.quantity,
+        };
+      }),
+      discounts: req.body?.coupon ? [{ coupon: req.body.couponId }] : [],
+    });
+
+    return res.status(200).json({ msg: "done", url: session.url });
+  }
+};
+
+/*
   const invoice = {
     shipping: {
       name: user.username,
@@ -115,7 +159,9 @@ export const createOrder = async (req, res, next) => {
     invoice_nr: order._id,
     date: order.createdAt,
   };
+
   createInvoice(invoice, "invoice.pdf");
+
   sendEmail(user.email, "hi this is pdf", "<h1>hello</h1>", [
     {
       path: "invoice.pdf",
@@ -126,9 +172,9 @@ export const createOrder = async (req, res, next) => {
       contentType: "image/jpg",
     },
   ]);
-
-  return res.status(200).json({ msg: "done", order });
 };
+
+*/
 
 export const cancelOrder = async (req, res, next) => {
   const { id } = req.params;
@@ -170,4 +216,3 @@ export const cancelOrder = async (req, res, next) => {
 
   return res.status(200).json({ msg: "order cancceled succesfuly", order });
 };
-

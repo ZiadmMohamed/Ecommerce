@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "./src/config/.env" });
+dotenv.config({ path: "./src/utilis/.env" });
 import express from "express";
 import connectionDb from "./Data Base/connection.js";
 import * as routers from "./src/modules/index.routes.js";
@@ -10,7 +10,7 @@ import cors from "cors";
 
 connectionDb();
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
