@@ -1,7 +1,8 @@
-export  const validation = (schema) => {
+export const validation = (schema) => {
   return (req, res, next) => {
     let errors = [];
-    const dataMethod = ["body", "query", "headers", "file", "files"];
+    const dataMethod = ["body", "params", "query", "headers", "file", "files"];
+
     dataMethod.forEach((method) => {
       if (schema[method]) {
         const data = schema[method].validate(req[method], {
@@ -12,9 +13,11 @@ export  const validation = (schema) => {
         }
       }
     });
+
     if (errors.length) {
       return res.status(400).json({ msg: "validation error", errors: errors });
     }
+
     next();
   };
 };

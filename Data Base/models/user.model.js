@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import systemRoles from "../../src/utilis/systemRoles.js";
 
 const userSchema = new Schema({
   username: {
@@ -15,7 +16,11 @@ const userSchema = new Schema({
   },
   password: { type: String, required: true },
   age: { type: Number, required: true },
-  role: { type: String, enum: ["user", "admin"] },
+  role: {
+    type: String,
+    enum: [systemRoles.user, systemRoles.admin],
+    default: systemRoles.user,
+  },
   isConfirmed: { type: Boolean, default: false },
   isLoggedIn: { type: Boolean, default: false },
   phoneNumbers: [String],

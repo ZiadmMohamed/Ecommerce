@@ -14,6 +14,8 @@ const subCategorySchema = new mongoose.Schema({
     ref: "Category",
     required: true,
   },
+  subCustomId: String,
 });
 
 const SubCategoryModel = mongoose.model("SubCategory", subCategorySchema);
+export default SubCategoryModel;

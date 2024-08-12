@@ -4,6 +4,7 @@ const productSchema = new mongoose.Schema({
   title: { type: String, required: true, unique: true },
   slug: { type: String, required: true, unique: true },
   desc: { type: String, required: true },
+  image: { secure_url: String, public_id: String },
   images: [{ secure_url: String, public_id: String }],
   addedBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -26,10 +27,13 @@ const productSchema = new mongoose.Schema({
     required: true,
   },
   price: { type: Number, required: true },
-  appliedDiscount: { type: Number, default: 0 },
-  priceAfterDiscount: { type: Number },
+  discount: { type: Number, min: 0, max: 100, default: 1 },
+  priceAfterDiscount: { type: Number, required: true },
   stock: { type: Number, required: true },
   avgRating: { type: Number, default: 0 },
+  productCustomId: String,
 });
 
-const Product = mongoose.model("Product", productSchema);
+const ProductModel = mongoose.model("Product", productSchema);
+
+export default ProductModel;

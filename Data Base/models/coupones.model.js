@@ -1,17 +1,35 @@
 import mongoose from "mongoose";
 
 const couponSchema = new mongoose.Schema({
-    couponCode: { type: String, required: true },
-    couponAmount: { type: Number, required: true },
-    addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    isPercentage: { type: Boolean, default: false },
-    isFixedAmount: { type: Boolean, default: false },
-    couponAssignedToUsers: [{
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-      maxCount: { type: Number, required: true },
-      numberOfUsage: { type: Number, required: true }
-    }]
-  });
-  
-  const Coupon = mongoose.model('Coupon', couponSchema);
-  
+  couponCode: { type: String, unique: true, required: true },
+  Amount: {
+    type: Number,
+    min: 1,
+    max: 100,
+    required: [true, "amount is required"],
+  },
+  addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  usedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
+  fromDate: {
+    type: Date,
+    required: [true, "fromDate is required"],
+  },
+  toDate: {
+    type: Date,
+    required: [true, "toDate is required"],
+  },
+});
+
+const Coupon = mongoose.model("Coupon", couponSchema);
+
+export default Coupon;

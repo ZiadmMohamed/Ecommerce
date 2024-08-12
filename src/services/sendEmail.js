@@ -5,17 +5,23 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: "ziady5060@gmail.com",
-    pass: "loiiyzvktviifcjm",
+    user: process.env.emailSender,
+    pass: process.env.password,
   },
 });
 
-export const sendEmail = async (to, subject = "", html = "") => {
+export const sendEmail = async (
+  to,
+  subject = "",
+  html = "",
+  attachments = []
+) => {
   const info = await transporter.sendMail({
-    from: '"ziad yassin" <ziady5060@gmail.com>',
+    from: `ziad yassin ${process.env.emailSender}`,
     to: to,
     subject: subject,
     html: html,
+    attachments,
   });
 
   console.log("Message sent: %s", info.messageId);
