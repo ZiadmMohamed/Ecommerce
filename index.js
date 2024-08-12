@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "./src/utilis/.env" });
+dotenv.config({ path: "./src/config/.env" });
 import express from "express";
 import connectionDb from "./Data Base/connection.js";
 import * as routers from "./src/modules/index.routes.js";
