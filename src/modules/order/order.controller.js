@@ -7,6 +7,7 @@ import createInvoice from "../../services/createInvoice.js";
 import { sendEmail } from "../../services/sendEmail.js";
 import payment from "../../utilis/payment.js";
 import Stripe from "stripe";
+import getRawBody from "raw-body";
 export const createOrder = async (req, res, next) => {
   const {
     productId,
@@ -216,28 +217,42 @@ export const cancelOrder = async (req, res, next) => {
 };
 
 export const webhook = async (req, res, next) => {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const sig = req.headers["stripe-signature"];
+
+  if (!sig) {
+    return res.status(400).send({ error: "Missing Stripe signature" });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   let event;
 
   try {
     event = stripe.webhooks.constructEvent(
-      req.body,
+      req.body, // Corrected to req.body, as req contains the raw body
       sig,
       process.env.endpointSecret
     );
   } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.error(`Webhook Error: ${err.message}`);
+    return res.status(400).send({ error: `Webhook Error: ${err.message}` });
   }
 
   const { orderId } = event.data.object.metadata;
 
-  if (event.type !== "checkout.session.completed") {
-    await Order.findOneAndUpdate({ _id: orderId }, { orderStatus: "Rejected" });
-    return res.status(400).json({ status: "fail" });
+  try {
+    if (event.type === "checkout.session.completed") {
+      await Order.findOneAndUpdate({ _id: orderId }, { orderStatus: "placed" });
+      return res.status(200).json({ status: "done" });
+    } else {
+      await Order.findOneAndUpdate(
+        { _id: orderId },
+        { orderStatus: "Rejected" }
+      );
+      return res.status(400).json({ status: "fail" });
+    }
+  } catch (dbError) {
+    console.error(`Database Error: ${dbError.message}`);
+    return res.status(500).send({ error: "Internal Server Error" });
   }
-
-  await Order.findOneAndUpdate({ _id: orderId }, { orderStatus: "placed" });
-  return res.status(200).json({ status: "done" });
 };
