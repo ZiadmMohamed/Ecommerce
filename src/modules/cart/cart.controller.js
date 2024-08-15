@@ -8,7 +8,7 @@ export const createCart = async (req, res, next) => {
   const user = req.user;
 
   const Product = await ProductModel.findById(productId);
-  if (!Product) new AppError("Product is not exist");
+  if (!Product) throw new AppError("Product is not exist");
 
   if (quantity > Product.stock)
     throw new AppError("the stock quantity is not enogh");

@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 
 export default async function payment({
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY),
+ stripe = new Stripe(process.env.STRIPE_SECRET_KEY),
   payment_method_types = ["card"],
   customer_email,
   metadata = {},

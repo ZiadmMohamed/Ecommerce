@@ -13,6 +13,10 @@ export const subCategoryValidation = {
     name: Joi.string(),
   }).options({ presence: "required" }),
 
+  params: Joi.object({
+    categoryId: Joi.string().custom(idValidation),
+  }),
+
   file: Joi.object({
     size: Joi.number().positive(),
     path: Joi.string(),

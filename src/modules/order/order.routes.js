@@ -3,8 +3,9 @@ import { validation } from "../../middleware/validation.js";
 import { handle } from "../../utilis/asyncHandler.js";
 import auth from "../../middleware/auth.js";
 import systemRoles from "../../utilis/systemRoles.js";
-import { cancelOrder, createOrder } from "./order.controller.js";
+import { cancelOrder, createOrder, webhook } from "./order.controller.js";
 import { cancleOrderValidation, orderValidation } from "./orderValidation.js";
+
 
 const router = Router();
 
@@ -20,5 +21,7 @@ router.delete(
   handle(auth(Object.values(systemRoles))),
   handle(cancelOrder)
 );
+
+router.post("/webhook", webhook);
 
 export default router;

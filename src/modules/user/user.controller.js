@@ -20,7 +20,6 @@ export const signUp = async (req, res, next) => {
 
   const refToken = jwt.sign({ email }, process.env.refemailSegnature);
   const refLink = `${req.protocol}://${req.headers.host}/user/resendLink/${refToken}`;
-
   await sendEmail(
     email,
     "verify your account",

@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "./src/utilis/.env" });
+dotenv.config({ path: "./src/config/.env" });
 import express from "express";
 import connectionDb from "./Data Base/connection.js";
 import * as routers from "./src/modules/index.routes.js";
@@ -13,7 +13,13 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl == "/order/webhook") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 app.get("/", (req, res) => res.send("Hello to my Ecommerce project"));
 

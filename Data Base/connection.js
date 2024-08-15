@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const connectionDb = async () => {
   return await mongoose
-    .connect(process.env.online_db_onnection)
+    .connect(process.env.Db_connection)
     .then(() => {
       console.log("DataBase connected");
     })
