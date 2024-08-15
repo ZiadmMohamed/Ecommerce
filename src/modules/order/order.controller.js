@@ -228,16 +228,16 @@ export const webhook = async (req, res, next) => {
       process.env.endpointSecret
     );
   } catch (err) {
-    response.status(400).send(`Webhook Error: ${err.message}`);
-    return;
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   const { orderId } = event.data.object.metadata;
+
   if (event.type !== "checkout.session.completed") {
     await Order.findOneAndUpdate({ _id: orderId }, { orderStatus: "Rejected" });
-    return res.status(400).json("fail");
+    return res.status(400).json({ status: "fail" });
   }
 
   await Order.findOneAndUpdate({ _id: orderId }, { orderStatus: "placed" });
-  return res.status(200).json("done");
+  return res.status(200).json({ status: "done" });
 };
