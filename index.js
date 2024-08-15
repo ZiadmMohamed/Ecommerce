@@ -15,7 +15,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 
 app.use(express.json());
-app.use("/order/webhook", express.raw({ type: "application/json" }));
 
 app.get("/", (req, res) => res.send("Hello to my Ecommerce project"));
 
